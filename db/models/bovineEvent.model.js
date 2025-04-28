@@ -1,5 +1,5 @@
-const { Model, DataTypes, Sequelize } = require('sequelize');
-
+const { Model, DataTypes } = require('sequelize');
+const { BOVINE_TABLE } = require('./bovine.model');
 const BOVINE_EVENT_TABLE = 'bovine_event';
 
 const BovineEventSchema = {
@@ -13,7 +13,7 @@ const BovineEventSchema = {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'bovine',
+      model: BOVINE_TABLE,
       key: 'bovine_id',
     },
     onDelete: 'CASCADE',
@@ -21,7 +21,7 @@ const BovineEventSchema = {
   event_date: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: Sequelize.NOW,
+    defaultValue: DataTypes.NOW,
   },
   event_category: {
     type: DataTypes.ENUM('Health', 'Reproduction'),
@@ -39,6 +39,7 @@ const BovineEventSchema = {
   },
   lactation_affected: {
     type: DataTypes.BOOLEAN,
+    allowNull: false,
     defaultValue: false,
   },
   notes: {
@@ -56,7 +57,9 @@ class BovineEvent extends Model {
       sequelize,
       tableName: BOVINE_EVENT_TABLE,
       modelName: 'BovineEvent',
-      timestamps: false,
+      timestamps: true,
+      underscored: true,
+      indexes: [{ fields: ['bovine_id', 'event_date'] }],
     };
   }
 }

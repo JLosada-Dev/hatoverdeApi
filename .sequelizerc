@@ -1,0 +1,16 @@
+/**
+ * Configuration object for Sequelize CLI.
+ *
+ * @property {string} config - Path to the configuration file.
+ * @property {string} models-path - Path to the models directory.
+ * @property {string} migrations-path - Path to the migrations directory.
+ * @property {string} seeders-path - Path to the seeders directory.
+ */
+
+module.exports = {
+  // El cli van a tener su propia conexion independiente de la conexion de la app por estas migraciones se corren a nivel de terminal
+  'config': "./db/config.js",
+  "models-path": "./db/models/",
+  "migrations-path": "./db/migrations/",
+  "seeders-path": "./db/seeders/",
+};

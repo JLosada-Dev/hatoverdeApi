@@ -1,9 +1,9 @@
-const { Model, DataTypes, Sequelize } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
+const { BOVINE_TABLE } = require('./bovine.model');
+const MILK_PRED_TABLE = 'milk_prediction';
 
-const MILK_PROD_TABLE = 'milk_production';
-
-const MilkProductionSchema = {
-  production_id: {
+const MilkPredictionSchema = {
+  prediction_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -13,29 +13,34 @@ const MilkProductionSchema = {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'bovine',
+      model: BOVINE_TABLE,
       key: 'bovine_id',
     },
     onDelete: 'CASCADE',
   },
-  milking_time: {
-    type: DataTypes.DATE,
+  prediction_date: {
+    type: DataTypes.DATEONLY,
     allowNull: false,
-    defaultValue: Sequelize.NOW,
+    defaultValue: DataTypes.NOW,
   },
-  milk_yield: {
+  predicted_week_start: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+  },
+  predicted_week_end: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+  },
+  predicted_milk_yield: {
     type: DataTypes.DECIMAL(5, 2),
     allowNull: false,
   },
-  milk_fat: {
-    type: DataTypes.DECIMAL(3, 1),
-  },
-  milk_protein: {
-    type: DataTypes.DECIMAL(3, 1),
+  prediction_accuracy: {
+    type: DataTypes.DECIMAL(4, 2),
   },
 };
 
-class MilkProduction extends Model {
+class MilkPrediction extends Model {
   static associate(models) {
     this.belongsTo(models.Bovine, { foreignKey: 'bovine_id', as: 'bovine' });
   }
@@ -43,11 +48,15 @@ class MilkProduction extends Model {
   static config(sequelize) {
     return {
       sequelize,
-      tableName: MILK_PROD_TABLE,
-      modelName: 'MilkProduction',
-      timestamps: false,
+      tableName: MILK_PRED_TABLE,
+      modelName: 'MilkPrediction',
+      timestamps: true,
+      underscored: true,
+      indexes: [
+        { unique: true, fields: ['bovine_id', 'predicted_week_start'] },
+      ],
     };
   }
 }
 
-module.exports = { MILK_PROD_TABLE, MilkProductionSchema, MilkProduction };
+module.exports = { MILK_PRED_TABLE, MilkPredictionSchema, MilkPrediction };

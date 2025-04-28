@@ -1,9 +1,9 @@
-const { Model, DataTypes, Sequelize } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
+const { BOVINE_TABLE } = require('./bovine.model');
+const MILK_PROD_TABLE = 'milk_production';
 
-const MILK_PRED_TABLE = 'milk_prediction';
-
-const MilkPredictionSchema = {
-  prediction_id: {
+const MilkProductionSchema = {
+  production_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -13,34 +13,29 @@ const MilkPredictionSchema = {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'bovine',
+      model: BOVINE_TABLE,
       key: 'bovine_id',
     },
     onDelete: 'CASCADE',
   },
-  prediction_date: {
-    type: DataTypes.DATEONLY,
+  milking_time: {
+    type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: Sequelize.NOW,
+    defaultValue: DataTypes.NOW,
   },
-  predicted_week_start: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
-  predicted_week_end: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
-  predicted_milk_yield: {
+  milk_yield: {
     type: DataTypes.DECIMAL(5, 2),
     allowNull: false,
   },
-  prediction_accuracy: {
-    type: DataTypes.DECIMAL(4, 2),
+  milk_fat: {
+    type: DataTypes.DECIMAL(3, 1),
+  },
+  milk_protein: {
+    type: DataTypes.DECIMAL(3, 1),
   },
 };
 
-class MilkPrediction extends Model {
+class MilkProduction extends Model {
   static associate(models) {
     this.belongsTo(models.Bovine, { foreignKey: 'bovine_id', as: 'bovine' });
   }
@@ -48,11 +43,13 @@ class MilkPrediction extends Model {
   static config(sequelize) {
     return {
       sequelize,
-      tableName: MILK_PRED_TABLE,
-      modelName: 'MilkPrediction',
-      timestamps: false,
+      tableName: MILK_PROD_TABLE,
+      modelName: 'MilkProduction',
+      timestamps: true,
+      underscored: true,
+      indexes: [{ fields: ['bovine_id', 'milking_time'] }],
     };
   }
 }
 
-module.exports = { MILK_PRED_TABLE, MilkPredictionSchema, MilkPrediction };
+module.exports = { MILK_PROD_TABLE, MilkProductionSchema, MilkProduction };

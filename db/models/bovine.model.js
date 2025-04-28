@@ -1,5 +1,4 @@
-const { Model, DataTypes, Squelize } = require('sequelize');
-
+const { Model, DataTypes } = require('sequelize');
 const BOVINE_TABLE = 'bovine';
 
 const BovineSchema = {
@@ -19,46 +18,66 @@ const BovineSchema = {
     allowNull: false,
   },
   date_of_birth: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
-  weigth_kg: {
+  weight_kg: {
     type: DataTypes.DECIMAL(6, 2),
     allowNull: false,
   },
   sex: {
-    type: DataTypes.ENUM('Macho', 'Hembra'),
+    type: DataTypes.ENUM('Male', 'Female'),
     allowNull: false,
   },
   lactation_stage: {
-    type: DataTypes.TINYINT,
+    type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 1,
     validate: { min: 1, max: 5 },
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
   },
 };
 
 class Bovine extends Model {
   static associate(models) {
-     this.hasMany(models.MilkProduction, {
-       foreignKey: 'bovine_id',
-       onDelete: 'CASCADE',
-     });
-     this.hasMany(models.BovineEvent, {
-       foreignKey: 'bovine_id',
-       onDelete: 'CASCADE',
-     });
-     this.hasMany(models.MilkPrediction, {
-       foreignKey: 'bovine_id',
-       onDelete: 'CASCADE',
-     });
+    this.hasMany(models.MilkProduction, {
+      foreignKey: 'bovine_id',
+      as: 'productions',
+      onDelete: 'CASCADE',
+    });
+    this.hasMany(models.BovineEvent, {
+      foreignKey: 'bovine_id',
+      as: 'events',
+      onDelete: 'CASCADE',
+    });
+    this.hasMany(models.MilkPrediction, {
+      foreignKey: 'bovine_id',
+      as: 'predictions',
+      onDelete: 'CASCADE',
+    });
   }
-  static config(squelize) {
+
+  static config(sequelize) {
     return {
-      squelize,
+      sequelize,
       tableName: BOVINE_TABLE,
       modelName: 'Bovine',
       timestamps: true,
+      underscored: true,
+      indexes: [
+        // ya tienes unique en ear_tag, pero lo reiteramos:
+        { unique: true, fields: ['ear_tag'] },
+        // índices de filtro:
+        { fields: ['is_active'] },
+        { fields: ['breed'] },
+        { fields: ['date_of_birth'] },
+        { fields: ['lactation_stage'] },
+        { fields: ['sex'] },
+      ],
     };
   }
 }

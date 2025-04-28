@@ -193,6 +193,7 @@ $RECYCLE.BIN/
 *.lnk
 
 pg_data
+postgres_data
 mysql_data
 mongo_data
 
