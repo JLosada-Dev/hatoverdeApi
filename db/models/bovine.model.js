@@ -1,4 +1,3 @@
-const { date, valid } = require('joi');
 const { Model, DataTypes, Squelize } = require('sequelize');
 
 const BOVINE_TABLE = 'bovine';
@@ -60,7 +59,8 @@ class Bovine extends Model {
       tableName: BOVINE_TABLE,
       modelName: 'Bovine',
       timestamps: true,
-
     };
   }
 }
+
+module.exports = { BOVINE_TABLE, BovineSchema, Bovine };
