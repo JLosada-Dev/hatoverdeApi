@@ -9,7 +9,7 @@ const {
   MilkPrediction,
 } = require('./milkPrediction.model');
 
-function setupModels(squelize) {
+function setupModels(sequelize) {
   // Initialize models
   Bovine.init(BovineSchema, Bovine.config(sequelize));
   MilkProduction.init(MilkProductionSchema, MilkProduction.config(sequelize));
