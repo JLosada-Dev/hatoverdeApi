@@ -2,18 +2,44 @@ const boom = require('@hapi/boom');
 const { models } = require('./../libs/sequelize');
 
 class BovineService {
-  constructor() {}
+
+  /**
+   * Devuelve todos los bovinos activos
+   */
   async find() {
-    const bovines = await models.Bovine.findAll();
+    const bovines = await models.Bovine.findAll({
+      where: { is_active: true },
+    });
     return bovines;
   }
+  /**
+   * Busca un bovino por su ID
+   * @throws Boom.notFound si no existe
+   */
   async findOne(id) {
-    const bovine = await models.Bovine.findByPk(id);
+    const bovine = await models.Bovine.findOne({
+      where: { id, is_active: true },
+    });
     if (!bovine) {
       throw boom.notFound('Bovine not found');
     }
     return bovine;
   }
+
+  async findByEarTag(ear_tag) {
+    const bovine = await models.Bovine.findOne({
+      where: { ear_tag, is_active: true },
+    });
+    if (!bovine) {
+      throw boom.notFound('Bovine not found');
+    }
+    return bovine;
+  }
+
+  /**
+   * Crea un nuevo bovino
+   * @param {Object} data - Datos del bovino
+   */
   async create(data) {
     const newBovine = await models.Bovine.create(data);
     return newBovine;

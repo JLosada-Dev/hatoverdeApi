@@ -15,4 +15,9 @@ const updateMilkProductionSchema = Joi.object({
   milk_protein: Joi.number().precision(1),
 });
 
+const getMilkProductionSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+});
+
+
 module.exports = { createMilkProductionSchema, updateMilkProductionSchema };

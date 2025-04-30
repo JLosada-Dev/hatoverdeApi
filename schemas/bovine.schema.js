@@ -20,4 +20,11 @@ const updateBovineSchema = Joi.object({
   is_active: Joi.boolean(),
 });
 
-module.exports = { createBovineSchema, updateBovineSchema };
+const getBovineSchema = Joi.object({
+  ear_tag: Joi.string().max(50).required(),
+});
+const getBovineByIdSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+});
+
+module.exports = { createBovineSchema, updateBovineSchema, getBovineSchema, getBovineByIdSchema };

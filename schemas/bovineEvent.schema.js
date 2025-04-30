@@ -21,4 +21,8 @@ const updateBovineEventSchema = Joi.object({
   notes: Joi.string().allow(''),
 });
 
+const getBovineEventSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+});
+
 module.exports = { createBovineEventSchema, updateBovineEventSchema };
