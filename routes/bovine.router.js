@@ -24,7 +24,7 @@ router.get('/', async (req, res, next) => {
 });
 
 router.get(
-  '/:ear_tag',
+  '/by-ear-tag/:ear_tag',
   validatorHandler(getBovineSchema, 'params'),
   async (req, res, next) => {
     try {
@@ -38,7 +38,7 @@ router.get(
 );
 
 router.get(
-  '/id/:id',
+  '/:id',
   validatorHandler(getBovineByIdSchema, 'params'),
   async (req, res, next) => {
     try {

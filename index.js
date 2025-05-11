@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors')
 const routerApi = require('./routes');
 
 const {
@@ -15,7 +16,10 @@ const port = process.env.PORT || 3000;
 // Middleware para manejar JSON y habilitar CORS
 app.use(express.json());
 
+// Cors es una librería que permite habilitar el acceso a recursos de un servidor desde otro dominio
 
+// habilitamos cors para que acepte peticiones de los dominios que están en la lista blanca
+app.use(cors({ origin: '*' }));
 
 // Ruta principal
 app.get('/', (req, res) => {
