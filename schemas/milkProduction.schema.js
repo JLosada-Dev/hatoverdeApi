@@ -19,5 +19,8 @@ const getMilkProductionSchema = Joi.object({
   id: Joi.number().integer().positive().required(),
 });
 
-
-module.exports = { createMilkProductionSchema, updateMilkProductionSchema };
+module.exports = {
+  createMilkProductionSchema,
+  updateMilkProductionSchema,
+  getMilkProductionSchema,
+};

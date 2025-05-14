@@ -32,8 +32,8 @@ const BovineSchema = {
   lactation_stage: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 1,
-    validate: { min: 1, max: 5 },
+    defaultValue: 0,
+    validate: { min: 0, max: 5 },
   },
   is_active: {
     type: DataTypes.BOOLEAN,

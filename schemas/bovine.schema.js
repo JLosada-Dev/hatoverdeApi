@@ -6,7 +6,7 @@ const createBovineSchema = Joi.object({
   date_of_birth: Joi.date().iso().required(),
   weight_kg: Joi.number().positive().precision(2).required(),
   sex: Joi.string().valid('Male', 'Female'),
-  lactation_stage: Joi.number().integer().min(1).max(5).required(),
+  lactation_stage: Joi.number().integer().min(0).max(5).required(),
   is_active: Joi.boolean().optional(), // por defecto true en BD
 });
 
@@ -27,4 +27,9 @@ const getBovineByIdSchema = Joi.object({
   id: Joi.number().integer().positive().required(),
 });
 
-module.exports = { createBovineSchema, updateBovineSchema, getBovineSchema, getBovineByIdSchema };
+module.exports = {
+  createBovineSchema,
+  updateBovineSchema,
+  getBovineSchema,
+  getBovineByIdSchema,
+};
