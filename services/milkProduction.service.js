@@ -3,7 +3,15 @@ const { models } = require('../libs/sequelize');
 
 class MilkProductionService {
   async find() {
-    return await models.MilkProduction.findAll();
+    return await models.MilkProduction.findAll({
+      order: [['milking_time', 'DESC']],
+      include: [
+        {
+          association: 'bovine', // Include the cow association
+          attributes: ['ear_tag', 'breed', 'date_of_birth', 'lactation_stage'], // Select only the id and name fields
+        },
+      ],
+    });
   }
 
   async findOne(id) {

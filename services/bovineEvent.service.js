@@ -6,7 +6,15 @@ class BovineEventService {
    * Devuelve todos los eventos registrados
    */
   async find() {
-    return await models.BovineEvent.findAll();
+    return await models.BovineEvent.findAll({
+      order: [['event_date', 'DESC']],
+      include: [
+        {
+          association: 'bovine',
+          attributes: ['ear_tag', 'breed', 'date_of_birth', 'lactation_stage'],
+        },
+      ],
+    });
   }
 
   /**

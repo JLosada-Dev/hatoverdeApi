@@ -7,7 +7,7 @@ class BovineService {
    */
   async find() {
     const bovines = await models.Bovine.findAll({
-      where: { is_active: true },
+      order: [['bovine_id', 'ASC']],
     });
     return bovines;
   }
