@@ -7,6 +7,32 @@ const {
   updateMilkProductionSchema,
   getMilkProductionSchema,
 } = require('../schemas/milkProduction.schema');
+const emitter = require('../events/productionEmitter');
+// ——————————————
+//  SSE endpoint: escucha nuevas producciones de un bovino
+// ——————————————
+router.get('/bovine/:id/stream', (req, res) => {
+  const bovineId = req.params.id;
+  // headers SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  // Comentario inicial
+  res.write(`: connected to bovine ${bovineId}\n\n`);
+
+  // Listener
+  const onNew = (prod) => {
+    res.write(`data: ${JSON.stringify(prod)}\n\n`);
+  };
+  emitter.on(`prod:${bovineId}`, onNew);
+
+  // Cuando el cliente cierra la conexión...
+  req.on('close', () => {
+    emitter.off(`prod:${bovineId}`, onNew);
+    res.end();
+  });
+});
 
 // Obtener todas las producciones
 router.get('/', async (req, res, next) => {

@@ -1,5 +1,6 @@
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
+const emitter = require('../events/productionEmitter');
 
 class MilkProductionService {
   async find() {
@@ -23,9 +24,11 @@ class MilkProductionService {
   }
 
   async create(data) {
-    return await models.MilkProduction.create(data);
+    const newProd = await models.MilkProduction.create(data);
+    // Disparamos un evento específico del bovino
+    emitter.emit(`prod:${newProd.bovine_id}`, newProd.toJSON());
+    return newProd;
   }
-
   async update(id, changes) {
     const entry = await this.findOne(id);
     return await entry.update(changes);
