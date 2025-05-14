@@ -54,6 +54,18 @@ class BovineService {
     await bovine.update({ is_active: false });
     return { id, message: 'Bovine deactivated' };
   }
+
+  /**
+   * Cambia el estado de is_active de un bovino
+   * @param {number} id - ID del bovino
+   * @param {boolean} is_active - Nuevo estado
+   */
+  async toggleActive(id) {
+    const bovine = await this.findOne(id);
+    const newStatus = !bovine.is_active;
+    await bovine.update({ is_active: newStatus });
+    return { id, is_active: newStatus };
+  }
 }
 
 module.exports = BovineService;

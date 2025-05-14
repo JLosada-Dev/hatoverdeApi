@@ -93,5 +93,19 @@ router.delete(
       next(error);
     }
   },
+
+  router.patch(
+    '/:id/toggle-active',
+    validatorHandler(getBovineByIdSchema, 'params'),
+    async (req, res, next) => {
+      try {
+        const { id } = req.params;
+        const response = await service.toggleActive(id);
+        res.json(response);
+      } catch (error) {
+        next(error);
+      }
+    },
+  ),
 );
 module.exports = router;
