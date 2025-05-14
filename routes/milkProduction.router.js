@@ -6,6 +6,7 @@ const {
   createMilkProductionSchema,
   updateMilkProductionSchema,
   getMilkProductionSchema,
+  dateQuerySchema,
 } = require('../schemas/milkProduction.schema');
 const emitter = require('../events/productionEmitter');
 // ——————————————
@@ -33,6 +34,69 @@ router.get('/bovine/:id/stream', (req, res) => {
     res.end();
   });
 });
+
+// ——————————————
+// resúmenes y gráficos
+// ——————————————
+
+router.get(
+  '/bovine/:id/daily-summary',
+  validatorHandler(getMilkProductionSchema, 'params'),
+  validatorHandler(dateQuerySchema, 'query'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { date } = req.query;
+      const summary = await service.dailySummary(+id, date);
+      res.json(summary);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  '/bovine/:id/daily-hourly',
+  validatorHandler(getMilkProductionSchema, 'params'),
+  validatorHandler(dateQuerySchema, 'query'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { date } = req.query;
+      const points = await service.dailyHourly(+id, date);
+      res.json(points);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  '/bovine/:id/daily-goal',
+  validatorHandler(getMilkProductionSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const goal = await service.getDailyGoal(+id);
+      res.json(goal);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get('/thresholds', async (req, res, next) => {
+  try {
+    const thr = await service.getThresholds();
+    res.json(thr);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ——————————————
+// CRUD
+// ——————————————
 
 // Obtener todas las producciones
 router.get('/', async (req, res, next) => {

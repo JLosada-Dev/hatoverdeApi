@@ -35,6 +35,11 @@ const BovineSchema = {
     defaultValue: 0,
     validate: { min: 0, max: 5 },
   },
+  daily_goal: {
+    type: DataTypes.DECIMAL(5, 2),
+    allowNull: false,
+    defaultValue: 20,
+  },
   is_active: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
