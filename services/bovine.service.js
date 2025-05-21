@@ -66,6 +66,18 @@ class BovineService {
     await bovine.update({ is_active: newStatus });
     return { id, is_active: newStatus };
   }
+
+  async listEarTags() {
+    const bovines = await models.Bovine.findAll({
+      attributes: ['bovine_id', 'ear_tag'],
+      order: [['bovine_id', 'ASC']],
+      where: { is_active: true },
+    });
+    return bovines.map((bovine) => ({
+      bovine_id: bovine.bovine_id,
+      ear_tag: bovine.ear_tag
+    }));
+  }
 }
 
 module.exports = BovineService;

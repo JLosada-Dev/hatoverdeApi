@@ -23,6 +23,15 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/list-active-ear-tags', async (_, res, next) => {
+  try {
+    const bovines = await service.listEarTags();
+    res.json(bovines);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get(
   '/by-ear-tag/:ear_tag',
   validatorHandler(getBovineSchema, 'params'),

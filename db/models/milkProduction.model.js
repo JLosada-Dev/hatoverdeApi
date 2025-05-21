@@ -38,6 +38,11 @@ const MilkProductionSchema = {
 class MilkProduction extends Model {
   static associate(models) {
     this.belongsTo(models.Bovine, { foreignKey: 'bovine_id', as: 'bovine' });
+    this.hasMany(models.Esp32Error, {
+      foreignKey: 'production_id',
+      as: 'errors',
+      onDelete: 'SET NULL',
+    });
   }
 
   static config(sequelize) {

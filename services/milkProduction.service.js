@@ -28,6 +28,7 @@ class MilkProductionService {
   async create(data) {
     const newProd = await models.MilkProduction.create(data);
     // Disparamos un evento específico del bovino
+    emitter.emit('production:new', newProd.toJSON());
     emitter.emit(`prod:${newProd.bovine_id}`, newProd.toJSON());
     return newProd;
   }

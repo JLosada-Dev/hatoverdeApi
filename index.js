@@ -1,7 +1,8 @@
+require('dotenv').config();
 const express = require('express');
-const cors = require('cors')
+const cors = require('cors');
+const os = require('os');
 const routerApi = require('./routes');
-
 const {
   logErrors,
   errorHandler,
@@ -9,33 +10,47 @@ const {
   ormErrorHandler,
 } = require('./middlewares/error.handler');
 
-// Inicializa la aplicación de Express
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware para manejar JSON y habilitar CORS
+// 1. JSON parser
 app.use(express.json());
 
-// Cors es una librería que permite habilitar el acceso a recursos de un servidor desde otro dominio
-
-// habilitamos cors para que acepte peticiones de los dominios que están en la lista blanca
+// 2. CORS (ajusta al origen de tu Angular)
 app.use(cors({ origin: '*' }));
 
-// Ruta principal
+// 3. Ruta de bienvenida
 app.get('/', (req, res) => {
   res.send('Welcome to the Milk Production API');
 });
 
+// Ruta de prueba para chequeo de conexión
+app.get('/ping', (req, res) => {
+  res.json({ ok: true, timestamp: Date.now() });
+});
+
+
+// 4. Rutas de la API
 routerApi(app);
 
-// Middleware para manejar errores
+// 5. Manejo de errores
 app.use(logErrors);
 app.use(ormErrorHandler);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 
-// Inicia el servidor
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+// 6. Arranque del servidor con log de IP real
+function getLocalIP() {
+  const ifaces = os.networkInterfaces();
+  for (const name in ifaces) {
+    for (const iface of ifaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+}
+app.listen(port, '0.0.0.0', () => {
+  const ip = getLocalIP() || 'localhost';
+  console.log(`Server running at http://${ip}:${port}`);
 });
-
