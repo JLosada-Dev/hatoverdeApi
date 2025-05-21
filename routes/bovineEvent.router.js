@@ -17,6 +17,23 @@ router.get('/', async (req, res, next) => {
     next(err);
   }
 });
+router.get('/health', async (_, res, next) => {
+  try {
+    const sickBovines = await service.findHealthBovines();
+    res.json(sickBovines);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/reproductive', async (_, res, next) => {
+  try {
+    const reproductiveBovines = await service.findReproductiveBovines();
+    res.json(reproductiveBovines);
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Obtener evento por ID
 router.get(

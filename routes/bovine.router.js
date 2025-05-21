@@ -46,6 +46,15 @@ router.get(
   },
 );
 
+router.get('/count-by-gender', async (_, res, next) => {
+  try {
+    const counts = await service.countByGender();
+    res.json(counts);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get(
   '/:id',
   validatorHandler(getBovineByIdSchema, 'params'),
@@ -102,19 +111,20 @@ router.delete(
       next(error);
     }
   },
-
-  router.patch(
-    '/:id/toggle-active',
-    validatorHandler(getBovineByIdSchema, 'params'),
-    async (req, res, next) => {
-      try {
-        const { id } = req.params;
-        const response = await service.toggleActive(id);
-        res.json(response);
-      } catch (error) {
-        next(error);
-      }
-    },
-  ),
 );
+
+router.patch(
+  '/:id/toggle-active',
+  validatorHandler(getBovineByIdSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const response = await service.toggleActive(id);
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 module.exports = router;

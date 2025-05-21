@@ -13,7 +13,9 @@
 - [🚀 Ejecución](#-ejecución)
 - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
 - [📡 Rutas Principales](#-rutas-principales)
+- [📊 Análisis de Datos](#-análisis-de-datos)
 - [🧬 Migraciones](#-migraciones)
+- [🔧 Modelos](#-modelos)
 - [🤝 Contribuciones](#-contribuciones)
 - [📄 Licencia](#-licencia)
 - [👤 Autor](#-autor)
@@ -27,6 +29,8 @@
 - Manejo de errores con **Boom**.
 - Asociaciones entre bovinos y sus producciones, eventos y predicciones.
 - Notificaciones en tiempo real con **SSE (Server-Sent Events)**.
+- Registro de errores de dispositivos ESP32.
+- Análisis estadístico de producción lechera.
 - Arquitectura modular y escalable.
 - Uso de **Docker** para base de datos y pgAdmin.
 
@@ -37,6 +41,7 @@
 - Node.js >= 14.17.0
 - npm o yarn
 - Docker y Docker Compose (opcional, recomendado para base de datos)
+- PostgreSQL (si no usas Docker)
 
 ---
 
@@ -44,16 +49,16 @@
 
 1. Clona el repositorio:
 
-  ```bash
-  git clone https://github.com/tu-usuario/hatoverde-api.git
-  cd hatoverde-api
-  ```
+```bash
+git clone https://github.com/tu-usuario/hatoverde-api.git
+cd hatoverde-api
+```
 
 2. Instala las dependencias:
 
-  ```bash
-  npm install
-  ```
+```bash
+npm install
+```
 
 ---
 
@@ -61,7 +66,7 @@
 
 Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 
-```
+```env
 NODE_ENV=development
 PORT=3000
 DATABASE_URL=postgres://user:password@localhost:5432/hatoverde
@@ -104,7 +109,7 @@ Servidor disponible en:
 
 ## 📁 Estructura del Proyecto
 
-```
+```plaintext
 .
 ├── config/
 ├── db/
@@ -112,11 +117,22 @@ Servidor disponible en:
 │   ├── models/
 │   └── seeders/
 ├── events/
+│   ├── esp32Emitter.js
+│   └── productionEmitter.js
 ├── libs/
 ├── middlewares/
 ├── routes/
+│   ├── bovine.router.js
+│   ├── bovineEvent.router.js
+│   ├── errorEsp32.router.js
+│   ├── milkPrediction.router.js
+│   └── milkProduction.router.js
 ├── schemas/
 ├── services/
+│   ├── bovine.service.js
+│   ├── bovineEvent.service.js
+│   ├── milkPrediction.service.js
+│   └── milkProduction.service.js
 ├── utils/
 ├── index.js
 ├── package.json
@@ -139,32 +155,67 @@ Servidor disponible en:
 
 ### 🥛 Producción de Leche
 
-- `GET /api/v1/milk-productions`
-- `GET /api/v1/milk-productions/:id`
-- `POST /api/v1/milk-productions`
-- `PUT /api/v1/milk-productions/:id`
-- `DELETE /api/v1/milk-productions/:id`
+- `GET /api/v1/milk-productions` — Lista todas las producciones
+- `GET /api/v1/milk-productions/:id` — Detalles de una producción
+- `POST /api/v1/milk-productions` — Crear producción
+- `PUT /api/v1/milk-productions/:id` — Actualizar producción
+- `DELETE /api/v1/milk-productions/:id` — Eliminar producción
 
 ### 📈 Predicciones de Leche
 
-- `GET /api/v1/predictions`
-- `GET /api/v1/predictions/:id`
-- `POST /api/v1/predictions`
-- `PUT /api/v1/predictions/:id`
-- `DELETE /api/v1/predictions/:id`
+- `GET /api/v1/predictions` — Lista todas las predicciones
+- `GET /api/v1/predictions/:id` — Detalles de una predicción
+- `POST /api/v1/predictions` — Crear predicción
+- `PUT /api/v1/predictions/:id` — Actualizar predicción
+- `DELETE /api/v1/predictions/:id` — Eliminar predicción
 
 ### 📋 Eventos de Bovinos
 
-- `GET /api/v1/bovine-events`
-- `GET /api/v1/bovine-events/:id`
-- `POST /api/v1/bovine-events`
-- `PUT /api/v1/bovine-events/:id`
-- `DELETE /api/v1/bovine-events/:id`
+- `GET /api/v1/bovine-events` — Lista todos los eventos
+- `GET /api/v1/bovine-events/:id` — Detalles de un evento
+- `POST /api/v1/bovine-events` — Crear evento
+- `PUT /api/v1/bovine-events/:id` — Actualizar evento
+- `DELETE /api/v1/bovine-events/:id` — Eliminar evento
+
+### 🔧 Errores ESP32
+
+- `GET /api/v1/esp32-errors` — Lista todos los errores registrados
+- `GET /api/v1/esp32-errors/:id` — Detalles de un error
+- `POST /api/v1/esp32-errors` — Registrar nuevo error
 
 ### 📡 SSE (Server-Sent Events)
 
 - `GET /api/v1/milk-productions/bovine/:id/stream`  
   Recibe notificaciones en tiempo real cuando se registra una nueva producción de leche para el bovino especificado.
+
+---
+
+## 📊 Análisis de Datos
+
+El sistema ofrece diversas funcionalidades de análisis de datos para la gestión eficiente de la producción lechera:
+
+### Producción de Leche
+
+- **Resumen diario por animal**: Totalización de producción por bovino.
+- **Resumen diario global**: Estadísticas de todo el hato.
+- **Evolución horaria**: Análisis de producción por horas.
+- **Metas diarias**: Seguimiento de objetivos por bovino.
+- **Umbrales de producción**: Identificación de rangos óptimos y problemáticos.
+
+### Indicadores Clave
+
+- **Productores destacados**: Identifica bovinos con mayor y menor producción.
+- **Producción mensual**: Análisis por bovino o global.
+- **Tendencias anuales**: Seguimiento de producción total por mes.
+
+### Predicciones
+
+El sistema permite crear predicciones de producción basadas en:
+
+- Etapa de lactación
+- Raza
+- Historial de producción
+- Factores estacionales
 
 ---
 
@@ -196,28 +247,83 @@ Servidor disponible en:
 
 ---
 
+## 🔧 Modelos
+
+### Bovine
+
+Representación del ganado bovino con los siguientes campos clave:
+
+- `bovine_id`: Identificador único
+- `ear_tag`: Etiqueta auricular, identificador visible único
+- `breed`: Raza (Holstein, Ayrshire, Jersey)
+- `sex`: Sexo (Male, Female)
+- `lactation_stage`: Etapa de lactación (0 para machos, 1-5 para hembras)
+- `daily_goal`: Meta diaria de producción en litros
+- `is_active`: Estado activo del animal
+
+### MilkProduction
+
+Registro de la producción de leche:
+
+- `production_id`: Identificador único
+- `bovine_id`: Referencia al bovino
+- `milking_time`: Fecha y hora del ordeño
+- `milk_yield`: Cantidad de leche producida en litros
+
+### BovineEvent
+
+Eventos relacionados con los bovinos:
+
+- `event_id`: Identificador único
+- `bovine_id`: Referencia al bovino
+- `event_type`: Tipo de evento (Health, Reproduction, etc.)
+- `event_date`: Fecha del evento
+- `description`: Descripción detallada del evento
+
+### MilkPrediction
+
+Predicciones de producción de leche:
+
+- `prediction_id`: Identificador único
+- `bovine_id`: Referencia al bovino
+- `prediction_date`: Fecha de predicción
+- `predicted_yield`: Producción estimada en litros
+
+### ESP32Error
+
+Registro de errores de dispositivos ESP32:
+
+- `error_id`: Identificador único
+- `device_id`: Identificador del dispositivo
+- `error_code`: Código de error
+- `description`: Descripción del error
+- `timestamp`: Fecha y hora del error
+
+---
+
 ## 🤝 Contribuciones
 
 ¡Las contribuciones son bienvenidas! Para colaborar:
 
 1. Haz un fork del repositorio.
+
 2. Crea una nueva rama:
 
-  ```bash
-  git checkout -b feature/nueva-funcionalidad
-  ```
+   ```bash
+   git checkout -b feature/nueva-funcionalidad
+   ```
 
 3. Realiza tus cambios y haz commit:
 
-  ```bash
-  git commit -m "Agrega nueva funcionalidad"
-  ```
+   ```bash
+   git commit -m "Agrega nueva funcionalidad"
+   ```
 
 4. Sube tu rama:
 
-  ```bash
-  git push origin feature/nueva-funcionalidad
-  ```
+   ```bash
+   git push origin feature/nueva-funcionalidad
+   ```
 
 5. Abre un **Pull Request**.
 

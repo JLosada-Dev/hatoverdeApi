@@ -76,6 +76,35 @@ class MilkProductionService {
   }
 
   /**
+   * Resumen diario global (toda la producción del día)
+   */
+  async dailySummaryGlobal(date) {
+    const start = moment(date).startOf('day').toDate();
+    const end = moment(date).endOf('day').toDate();
+    const row = await models.MilkProduction.findOne({
+      attributes: [
+        [literal(`'${date}'`), 'date'],
+        [fn('sum', col('milk_yield')), 'total'],
+        [fn('count', col('production_id')), 'count'],
+        [fn('avg', col('milk_yield')), 'average'],
+        [fn('min', col('milk_yield')), 'min'],
+        [fn('max', col('milk_yield')), 'max'],
+      ],
+      where: {
+        milking_time: { [Op.between]: [start, end] },
+      },
+      raw: true,
+    });
+    return {
+      date: row.date,
+      total: +row.total,
+      count: +row.count,
+      average: +row.average,
+      min: +row.min,
+      max: +row.max,
+    };
+  }
+  /**
    * 2) Evolución horaria agrupada
    */
   async dailyHourly(bovineId, date) {
@@ -127,6 +156,122 @@ class MilkProductionService {
       low: 5, // <5 L rojo
       high: 15, // >15 L verde
     };
+  }
+
+  /**
+   * 5) Bovine con mayor y menor producción total
+   */
+  async topAndLowestProducer(date) {
+    const start = moment(date).startOf('day').toDate();
+    const end = moment(date).endOf('day').toDate();
+
+    // Agrupamos por bovino y sumamos la producción
+    const results = await models.MilkProduction.findAll({
+      attributes: ['bovine_id', [fn('sum', col('milk_yield')), 'totalYield']],
+      include: [
+        {
+          association: 'bovine',
+          attributes: ['ear_tag', 'breed', 'date_of_birth', 'lactation_stage'],
+        },
+      ],
+      where: {
+        milking_time: { [Op.between]: [start, end] },
+      },
+      group: [
+        'MilkProduction.bovine_id',
+        'bovine.bovine_id',
+        'bovine.ear_tag',
+        'bovine.breed',
+        'bovine.date_of_birth',
+        'bovine.lactation_stage',
+      ],
+      order: [[fn('sum', col('milk_yield')), 'DESC']],
+      raw: false,
+    });
+
+    if (results.length === 0) {
+      return { topProducer: null, lowestProducer: null };
+    }
+
+    // El include trae los datos del bovino directamente
+    const top = results[0];
+    const low = results[results.length - 1];
+
+    return {
+      topProducer: {
+        ...(top.bovine?.toJSON?.() ?? top.bovine),
+        totalYield: +top.get('totalYield'),
+      },
+      lowestProducer: {
+        ...(low.bovine?.toJSON?.() ?? low.bovine),
+        totalYield: +low.get('totalYield'),
+      },
+    };
+  }
+
+  /**
+   * 6) Producción mensual por bovino (o global)
+   *    Devuelve la suma diaria de leche para un mes y bovino opcional.
+   *    Si no se pasa bovineId, devuelve la suma global.
+   */
+  async monthlyProduction({ bovineId, year, month }) {
+    // month: 1-12
+    const start = moment({ year, month: month - 1, day: 1 })
+      .startOf('month')
+      .toDate();
+    const end = moment(start).endOf('month').toDate();
+
+    const where = {
+      milking_time: { [Op.between]: [start, end] },
+    };
+    if (bovineId) {
+      where.bovine_id = bovineId;
+    }
+
+    const rows = await models.MilkProduction.findAll({
+      attributes: [
+        [fn('date', col('milking_time')), 'date'],
+        [fn('sum', col('milk_yield')), 'totalYield'],
+      ],
+      where,
+      group: [fn('date', col('milking_time'))],
+      order: [[fn('date', col('milking_time')), 'ASC']],
+      raw: true,
+    });
+
+    // Devuelve [{ date: '2024-06-01', totalYield: 12 }, ...]
+    return rows.map((r) => ({
+      date: r.date,
+      totalYield: +r.totalYield,
+    }));
+  }
+
+  /**
+   * 7) Producción total por mes (global)
+   *    Devuelve la suma total de leche producida por mes en todo el rebaño.
+   */
+  async totalByMonth({ year }) {
+    const start = moment({ year, month: 0, day: 1 }).startOf('year').toDate();
+    const end = moment(start).endOf('year').toDate();
+
+    const rows = await models.MilkProduction.findAll({
+      attributes: [
+        [fn('date_trunc', 'month', col('milking_time')), 'month'],
+        [fn('sum', col('milk_yield')), 'totalYield'],
+      ],
+      where: {
+        milking_time: { [Op.between]: [start, end] },
+      },
+      group: [literal(`date_trunc('month', milking_time)`)],
+      order: [[literal(`date_trunc('month', milking_time)`), 'ASC']],
+      raw: true,
+    });
+
+    // Devuelve [{ month: '2024-01-01T00:00:00.000Z', totalYield: 1234 }, ...]
+    return rows.map((r) => ({
+      month: r.month,
+      totalYield: +r.totalYield,
+    }));
   }
 }
 

@@ -75,8 +75,20 @@ class BovineService {
     });
     return bovines.map((bovine) => ({
       bovine_id: bovine.bovine_id,
-      ear_tag: bovine.ear_tag
+      ear_tag: bovine.ear_tag,
     }));
+  }
+
+  /**
+   * Devuelve la cantidad total de bovinos y el conteo de machos y hembras
+   */
+  async countByGender() {
+    const [total, males, females] = await Promise.all([
+      models.Bovine.count(),
+      models.Bovine.count({ where: { sex: 'Male' } }),
+      models.Bovine.count({ where: { sex: 'Female' } }),
+    ]);
+    return { total, males, females };
   }
 }
 

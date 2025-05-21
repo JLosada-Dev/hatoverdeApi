@@ -79,6 +79,20 @@ router.get(
 );
 
 router.get(
+  '/daily-summary',
+  validatorHandler(dateQuerySchema, 'query'),
+  async (req, res, next) => {
+    try {
+      const { date } = req.query;
+      const summary = await service.dailySummaryGlobal(date);
+      res.json(summary);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
   '/bovine/:id/daily-hourly',
   validatorHandler(getMilkProductionSchema, 'params'),
   validatorHandler(dateQuerySchema, 'query'),
@@ -112,6 +126,59 @@ router.get('/thresholds', async (req, res, next) => {
   try {
     const thr = await service.getThresholds();
     res.json(thr);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/top-and-lowest', async (req, res, next) => {
+  try {
+    const { date } = req.query;
+    const { topProducer, lowestProducer } =
+      await service.topAndLowestProducer(date);
+    res.json({ topProducer, lowestProducer });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/monthly', async (req, res, next) => {
+  try {
+    const { year, month, bovineId } = req.query;
+
+    if (!year || !month) {
+      return res
+        .status(400)
+        .json({ message: 'Los parámetros "year" y "month" son obligatorios.' });
+    }
+
+    const result = await service.monthlyProduction({
+      year: parseInt(year),
+      month: parseInt(month),
+      bovineId: bovineId ? parseInt(bovineId) : undefined,
+    });
+
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/annual/monthly-total', async (req, res, next) => {
+  try {
+    const { year } = req.query;
+
+    if (!year) {
+      return res
+        .status(400)
+        .json({ message: 'El parámetro "year" es obligatorio.' });
+    }
+
+    const result = await service.totalByMonth({
+      year: parseInt(year),
+    });
+
+    res.json(result);
   } catch (err) {
     next(err);
   }
