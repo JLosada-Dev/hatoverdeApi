@@ -27,10 +27,32 @@ class MilkProductionService {
 
   async create(data) {
     const newProd = await models.MilkProduction.create(data);
-    // Disparamos un evento específico del bovino
-    emitter.emit('production:new', newProd.toJSON());
-    emitter.emit(`prod:${newProd.bovine_id}`, newProd.toJSON());
-    return newProd;
+
+    // Cargar bovino relacionado
+    const prodWithBovine = await models.MilkProduction.findByPk(
+      newProd.production_id,
+      {
+        include: [
+          {
+            association: 'bovine',
+            attributes: [
+              'bovine_id',
+              'ear_tag',
+              'breed',
+              'date_of_birth',
+              'lactation_stage',
+            ],
+          },
+        ],
+      },
+    );
+
+    // Emitimos los datos completos que espera el frontend
+    const payload = prodWithBovine.toJSON();
+    emitter.emit('production:new', payload);
+    emitter.emit(`prod:${payload.bovine_id}`, payload);
+
+    return prodWithBovine;
   }
   async update(id, changes) {
     const entry = await this.findOne(id);
@@ -51,16 +73,16 @@ class MilkProductionService {
     const end = moment(date).endOf('day').toDate();
     const row = await models.MilkProduction.findOne({
       attributes: [
-        [literal(`'${date}'`), 'date'],
-        [fn('sum', col('milk_yield')), 'total'],
-        [fn('count', col('production_id')), 'count'],
-        [fn('avg', col('milk_yield')), 'average'],
-        [fn('min', col('milk_yield')), 'min'],
-        [fn('max', col('milk_yield')), 'max'],
+      [literal(`'${date}'`), 'date'],
+      [fn('sum', col('milk_yield')), 'total'],
+      [fn('count', col('production_id')), 'count'],
+      [fn('round', fn('avg', col('milk_yield')), 2), 'average'],
+      [fn('round', fn('min', col('milk_yield')), 2), 'min'],
+      [fn('round', fn('max', col('milk_yield')), 2), 'max'],
       ],
       where: {
-        bovine_id: id,
-        milking_time: { [Op.between]: [start, end] },
+      bovine_id: id,
+      milking_time: { [Op.between]: [start, end] },
       },
       raw: true,
     });
