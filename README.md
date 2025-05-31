@@ -340,4 +340,4 @@ Este proyecto está bajo la licencia **MIT**. Consulta el archivo [LICENSE](./LI
 ### @JLosada-Dev - ByteCrafters
 
 Repositorio original:  
-[https://github.com/tu-usuario/hatoverde-api](https://github.com/tu-usuario/hatoverde-api)
+[https://github.com/JLosada-Dev/hatoverdeApi](https://github.com/JLosada-Dev/hatoverdeApi)
